@@ -2,63 +2,89 @@
 #include <stdlib.h>
 
 typedef struct _Node{
-    int data;
-    int index;
-    struct _Node* left;
-    struct _Node* right;
-} Node;
+    char taken;
+    int height;
+    int left;
+    int right;
+}Node;
+
+Node* lolis;
+int* sortedId;
+
+int compareNode(const void *a, const void *b);
 
 int main(){
     int N, K;
     scanf("%d %d", &N, &K);
-    char* ans = (char*) malloc(sizeof(char) * N);
 
-    Node* head = NULL;
-    Node* prev = NULL;
+    lolis = (Node*) malloc(N * sizeof(Node));
+    sortedId = (int *)malloc(N * sizeof(int));
+
     for(int i=0 ; i<N ; ++i){
-        int num;
-        scanf("%d", &num);
-        Node* newNode = (Node*) malloc(sizeof(Node));
-        newNode->index = i;
-        newNode->data = num;
-        newNode->left = NULL;
-        newNode->right = NULL;
+        int height;
+        scanf("%d", &height);
 
-        if(!head){
-            head = newNode;
-            prev = head;
-        }else{
-            prev->right = newNode;
-            newNode->left = prev;
-            prev = newNode;
+        lolis[i].taken = 0;
+        lolis[i].height = height;
+        lolis[i].right = i+1;
+        lolis[i].left = i-1;
+
+        sortedId[i] = i;
+    }
+    lolis[N-1].right = -1;
+
+    qsort(sortedId, N, sizeof(int), compareNode);
+    
+    int remain = N;
+    char turn = 'S';
+    int head = 0, center, left, right;
+    while(remain > 0){
+        while(lolis[sortedId[head]].taken)
+            head++;
+        
+        center = sortedId[head];
+        lolis[center].taken = turn;
+        remain--;
+
+        left = lolis[center].left;
+        right = lolis[center].right;
+        for(int i=0 ; i<K ; ++i){
+            if(left >= 0){
+                lolis[left].taken = turn;
+                remain--;
+                left = lolis[left].left;
+            }
+            if(right >= 0){
+                lolis[right].taken = turn;
+                remain--;
+                right = lolis[right].right;
+            }
         }
-    }
-    Node* tail = prev;
 
-    // Node* curNode = head;
-    // while(curNode){
-    //     printf("%d ", curNode->data);
-    //     curNode = curNode->right;
-    // }
-    
-    // Node** Array = (Node**) malloc(sizeof(Node*) * N);
-    
-    Node* curNode = head;
-    Node* maxNode = head;
-    while(curNode){
-        if(curNode->data > maxNode->data)
-            maxNode = curNode;
-        curNode = curNode->right;
-    }
-    char curPerson = 'S';
-    int flag = 1;
-    while(flag == 1){
-        ans[maxNode->index];
+        if(right >= 0){
+            lolis[right].left = left;
+        }
 
+        if(left >= 0){
+            lolis[left].right = right;
+        }
+
+        turn = (turn == 'S') ? 'J' : 'S';
     }
 
-    
-
+    for(int i=0 ; i<N ; ++i){
+        printf("%c", lolis[i].taken);
+    }
+    printf("\n");
 
     return 0;
+}
+
+int compareNode(const void *a, const void *b){
+    int idx1 = * (int *)a;
+    int idx2 = * (int *)b;
+    if(lolis[idx1].height > lolis[idx2].height){
+        return -1;
+    }
+    else return 1;
 }
