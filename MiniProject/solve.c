@@ -25,10 +25,19 @@ everything is an expression
 */
 
 #define MAXLEN 256
+#define TBLSIZE 64
+
 
 typedef enum {MISPAREN, NOTNUMID, NOTFOUND, RUNOUT} ErrorType;
 typedef enum {UNKNOWN, END, INT, ID, ORANDXOR, ADDSUB, MULDIV, ASSIGN,
 LPAREN, RPAREN, ENDFILE} TokenSet;
+
+typedef struct {
+    char name[MAXLEN];
+    int val;
+} Symbol;
+
+Symbol table[TBLSIZE];
 
 typedef struct _Node {
     char lexeme[MAXLEN];
@@ -64,21 +73,57 @@ int main(void)
     freopen( "input.in" , "r" , stdin ) ;
     freopen( "output.out" , "w" , stdout ) ;
     */
-
+    printf(">> ");
     while (1) {
         statement();
     }
     return 0;
 }
 
+int sbcount = 0;
 int getval(void)
 {
+    int i, retval, found;
 
+    if (match(INT)) {
+        retval = atoi(getLexeme());
+    } else if (match(ID)) {
+        i = 0; found = 0; retval = 0;
+        while (i<sbcount && !found) {
+            if (strcmp(getLexeme(), table[i].name)==0) {
+                retval = table[i].val;
+                found = 1;
+                break;
+            } else {
+                i++;
+            }
+        }
+        if (!found) {
+            if (sbcount < TBLSIZE) {
+                strcpy(table[sbcount].name, getLexeme());
+                table[sbcount].val = 0;
+                sbcount++;
+            } else {
+                error(RUNOUT);
+            }
+        }
+    }
+    return retval;
 }
-
 int setval(char *str, int val)
 {
-
+    int i, retval;
+    i = 0;
+    while (i<sbcount) {
+        if (strcmp(str, table[i].name)==0) {
+            table[i].val = val;
+            retval = val;
+            break;
+        } else {
+            i++;
+        }
+    }
+    return retval;
 }
 
 int evaluateTree(BTNode *root)
@@ -293,13 +338,29 @@ BTNode* term_tail(BTNode *left)
 /* expr := term expr_tail */
 BTNode* expr(void)
 {
+    BTNode *node;
 
+    node = term();
+
+    return expr_tail(node);
 }
 
 /* expr_tail := ADD_SUB_AND_OR_XOR term expr_tail | NiL */
 BTNode* expr_tail(BTNode *left)
 {
+    BTNode *node;
 
+    if (match(ADDSUB)) {
+        node = makeNode(ADDSUB, getLexeme());
+        advance();
+
+        node->left = left;
+        node->right = term();
+
+        return expr_tail(node);
+    }
+    else
+        return left;
 }
 
 void advance(void)
@@ -330,6 +391,7 @@ void statement(void)
 
     } else if (match(END)) {
 
+        printf(">> ");
         advance();
 
     } else {
@@ -341,6 +403,7 @@ void statement(void)
             printPrefix(retp); printf("\n");
             freeTree(retp);
 
+            printf(">> ");
             advance();
         }
 
