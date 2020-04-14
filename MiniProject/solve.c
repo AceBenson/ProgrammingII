@@ -29,8 +29,7 @@ everything is an expression
 
 
 typedef enum {MISPAREN, NOTNUMID, NOTFOUND, RUNOUT} ErrorType;
-typedef enum {UNKNOWN, END, INT, ID, ORANDXOR, ADDSUB, MULDIV, ASSIGN,
-LPAREN, RPAREN, ENDFILE} TokenSet;
+typedef enum {UNKNOWN, END, INT, ID, ORANDXOR, ADDSUB, MULDIV, ASSIGN, LPAREN, RPAREN, ENDFILE} TokenSet;
 
 typedef struct {
     char name[MAXLEN];
@@ -189,7 +188,7 @@ TokenSet getToken(void)
     int i;
     char c;
 
-    while ( (c = fgetc(stdin)) == ' ' || c== '\t' );  // 忽略空白字元
+    while ( (c = fgetc(stdin)) == ' ' || c == '\t' );  // 忽略空白字元
 
     if (isdigit(c)) {
         lexeme[0] = c;
@@ -290,8 +289,7 @@ BTNode* factor(void)
         }
     }
     else if (match(ORANDXOR)){
-
-
+        // TODO
     }
     else if (match(LPAREN)) {
         advance();
@@ -358,6 +356,8 @@ BTNode* expr_tail(BTNode *left)
         node->right = term();
 
         return expr_tail(node);
+    }else if(match(ORANDXOR)){
+        // TODO
     }
     else
         return left;
@@ -400,7 +400,15 @@ void statement(void)
         if (match(END)) {
 
             printf("%d\n", evaluateTree(retp));
-            printPrefix(retp); printf("\n");
+            printPrefix(retp); 
+            printf("\n");
+
+            // for(int i=0 ; i<TBLSIZE ; ++i)
+            //     printf("table name = %s\n", table[i].name);
+            
+            // for(int i=0 ; i<TBLSIZE ; ++i)
+            //     printf("table val = %d\n", table[i].val);
+
             freeTree(retp);
 
             printf(">> ");
