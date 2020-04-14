@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /*
 Something like Python
@@ -28,7 +29,7 @@ everything is an expression
 #define TBLSIZE 64
 
 
-typedef enum {MISPAREN, NOTNUMID, NOTFOUND, RUNOUT} ErrorType;
+typedef enum {MISPAREN, NOTNUMID, NOTFOUND, RUNOUT, DEVIDEBYZERO} ErrorType;
 typedef enum {UNKNOWN, END, INT, ID, ORANDXOR, ADDSUB, MULDIV, ASSIGN, LPAREN, RPAREN, ENDFILE} TokenSet;
 
 typedef struct {
@@ -66,6 +67,15 @@ BTNode* makeNode(TokenSet, const char *);
 int getval(void);
 int setval(char *, int);
 
+// myFunc
+bool isValid(BTNode* root);
+bool checkTree(BTNode* root);
+
+void resetNode(BTNode* node, int newVal);
+void reconstructTree(BTNode* root);
+
+void printAssembly(BTNode* root);
+
 int main(void)
 {
     /*
@@ -79,16 +89,16 @@ int main(void)
     return 0;
 }
 
-int sbcount = 0;
-int getval(void)
+int sbcount = 0; // 目前的變數有多少個
+int getval(void) // 回傳INT || ID 的值
 {
     int i, retval, found;
 
-    if (match(INT)) {
+    if (match(INT)) { //如果是數字
         retval = atoi(getLexeme());
-    } else if (match(ID)) {
+    } else if (match(ID)) { // 如果是變數
         i = 0; found = 0; retval = 0;
-        while (i<sbcount && !found) {
+        while (i<sbcount && !found) { //去table找變數的值
             if (strcmp(getLexeme(), table[i].name)==0) {
                 retval = table[i].val;
                 found = 1;
@@ -97,7 +107,7 @@ int getval(void)
                 i++;
             }
         }
-        if (!found) {
+        if (!found) { // 如果找完都沒找到，就創建這個變數
             if (sbcount < TBLSIZE) {
                 strcpy(table[sbcount].name, getLexeme());
                 table[sbcount].val = 0;
@@ -109,7 +119,7 @@ int getval(void)
     }
     return retval;
 }
-int setval(char *str, int val)
+int setval(char *str, int val) // 設置變數str的值為val
 {
     int i, retval;
     i = 0;
@@ -139,6 +149,7 @@ int evaluateTree(BTNode *root)
         case ASSIGN:
         case ADDSUB:
         case MULDIV:
+        case ORANDXOR:
             lv = evaluateTree(root->left);
             rv = evaluateTree(root->right);
             if (strcmp(root->lexeme, "+") == 0)
@@ -151,6 +162,13 @@ int evaluateTree(BTNode *root)
                 retval = lv / rv;
             else if (strcmp(root->lexeme, "=") == 0)
                 retval = setval(root->left->lexeme, rv);
+            // TODO
+            else if (strcmp(root->lexeme, "|") == 0)
+                retval = lv | rv;
+            else if (strcmp(root->lexeme, "&") == 0)
+                retval = lv & rv;
+            else if (strcmp(root->lexeme, "^") == 0)
+                retval = lv ^ rv;
             break;
         default:
             retval = 0;
@@ -249,20 +267,21 @@ TokenSet getToken(void)
 
 BTNode* factor(void)
 {
+    // printf("In factor function\n");
     BTNode* retp = NULL;
     char tmpstr[MAXLEN];
 
-    if (match(INT)) {
+    if (match(INT)) { // INT
         retp =  makeNode(INT, getLexeme());
         retp->val = getval();
         advance();
     }
-    else if (match(ID)) {
+    else if (match(ID)) { // ID
         BTNode* left = makeNode(ID, getLexeme());
         left->val = getval();
         strcpy(tmpstr, getLexeme());
         advance();
-        if (match(ASSIGN)) {
+        if (match(ASSIGN)) { // ID ASSIGN expr // ex. x = expr
             retp = makeNode(ASSIGN, getLexeme());
             advance();
             retp->right = expr();
@@ -274,7 +293,7 @@ BTNode* factor(void)
     else if (match(ADDSUB)) {
     	strcpy(tmpstr, getLexeme());
         advance();
-        if (match(ID) || match(INT)) {
+        if (match(ID) || match(INT)) { // ADD_SUB INT // ADD_SUB ID
             retp = makeNode(ADDSUB, tmpstr);
             if (match(ID))
                 retp->right = makeNode(ID, getLexeme());
@@ -290,8 +309,9 @@ BTNode* factor(void)
     }
     else if (match(ORANDXOR)){
         // TODO
+        // maybe do nothing (?)
     }
-    else if (match(LPAREN)) {
+    else if (match(LPAREN)) { // LPAREN expr RPAREN
         advance();
         retp = expr();
         if (match(RPAREN)) {
@@ -308,6 +328,7 @@ BTNode* factor(void)
 /* term := factor term_tail */
 BTNode* term(void)
 {
+    // printf("In term function\n");
     BTNode *node;
 
     node = factor();
@@ -315,9 +336,10 @@ BTNode* term(void)
     return term_tail(node);
 }
 
-/* term_tail := MUL_DIV factor term_tail|NiL */
+/* term_tail := MUL_DIV factor term_tail | NiL */
 BTNode* term_tail(BTNode *left)
 {
+    // printf("In term_tail function\n");
     BTNode *node;
 
     if (match(MULDIV)) {
@@ -336,6 +358,7 @@ BTNode* term_tail(BTNode *left)
 /* expr := term expr_tail */
 BTNode* expr(void)
 {
+    // printf("In expr function\n");
     BTNode *node;
 
     node = term();
@@ -346,6 +369,7 @@ BTNode* expr(void)
 /* expr_tail := ADD_SUB_AND_OR_XOR term expr_tail | NiL */
 BTNode* expr_tail(BTNode *left)
 {
+    // printf("In expr_tail function\n");
     BTNode *node;
 
     if (match(ADDSUB)) {
@@ -358,6 +382,13 @@ BTNode* expr_tail(BTNode *left)
         return expr_tail(node);
     }else if(match(ORANDXOR)){
         // TODO
+        node = makeNode(ORANDXOR, getLexeme());
+        advance();
+
+        node->left = left;
+        node->right = term();
+
+        return expr_tail(node);
     }
     else
         return left;
@@ -399,15 +430,23 @@ void statement(void)
         retp = expr();
         if (match(END)) {
 
-            printf("%d\n", evaluateTree(retp));
-            printPrefix(retp); 
-            printf("\n");
-
-            // for(int i=0 ; i<TBLSIZE ; ++i)
-            //     printf("table name = %s\n", table[i].name);
+            int valid = isValid(retp);
+            if(!valid){
+                printf("EXIT 1\n");
+                exit(0);
+            }
             
-            // for(int i=0 ; i<TBLSIZE ; ++i)
-            //     printf("table val = %d\n", table[i].val);
+            // printf("%d\n", evaluateTree(retp));
+            // printPrefix(retp); 
+            // printf("\n");
+
+            reconstructTree(retp);
+
+            // printf("%d\n", evaluateTree(retp));
+            // printPrefix(retp); 
+            // printf("\n");
+
+            // TODO
 
             freeTree(retp);
 
@@ -431,7 +470,12 @@ void error(ErrorType errorNum)
         break;
     case RUNOUT:
         fprintf(stderr, "Out of memory\n");
+        break;
+    case DEVIDEBYZERO:
+        fprintf(stderr, "Devide by zero");
+        break;
     }
+    printf("EXIT 1\n");
     exit(0);
 }
 /* clean a tree.*/
@@ -441,4 +485,90 @@ void freeTree(BTNode *root){
         freeTree(root->right);
         free(root);
     }
+}
+
+// myFunc
+bool isValid(BTNode* root){
+    printf("In isValid function\n");
+    if(root->data == ASSIGN && root->left->data == ID){ // ID ASSIGN expr
+        if(checkTree(root->right))
+            return true;
+    }
+    return false;
+}
+
+bool checkTree(BTNode* root){
+    if(!root) return false;
+    if(root->data == ID){
+        int i = 0;
+        while (i<sbcount) { //去table找變數的值
+            if (strcmp(root->lexeme, table[i].name)==0) {
+                return true;
+            }
+            ++i;
+        }
+        return false;
+    }else if(root->data == INT){
+        return root->left == NULL && root->right == NULL;
+    }else if(root->data == ASSIGN){
+        // printf("EXIT 1\n");
+        // exit(0);
+        return false;
+    }else{
+        return checkTree(root->left) && checkTree(root->left);
+    }
+}
+
+
+void resetNode(BTNode* node, int newVal){ //將原本應該是符號的node直接轉成常數
+    node->data = INT;
+    node->left = NULL;
+    node->right = NULL;
+    sprintf(node->lexeme, "%d", newVal);
+    node->val = newVal;
+}
+void reconstructTree(BTNode* root){ //將常數部分先結合起來
+    if(!root)
+        return;
+    // printf("reconstructTree, root = '%s'\n", root->lexeme);
+    reconstructTree(root->left);
+    reconstructTree(root->right);
+    if(root->left && root->right && root->left->data == INT && root->right->data == INT){ //make sure root->left != NULL && root->right != NULL
+        switch(root->data){
+        case ORANDXOR:
+            if(root->lexeme[0]== '&'){
+                resetNode(root, root->left->val & root->right->val);
+            }
+            else if(root->lexeme[0] == '|'){
+                resetNode(root, root->left->val | root->right->val);
+            }
+            else if(root->lexeme[0] == '^'){
+                resetNode(root, root->left->val ^ root->right->val);
+            }
+            break;
+        case ADDSUB:
+            if(root->lexeme[0]== '+'){
+                resetNode(root, root->left->val + root->right->val);
+            }
+            else if(root->lexeme[0] == '-'){
+                resetNode(root, root->left->val - root->right->val);
+            }
+            break;
+        case MULDIV:
+            if(root->lexeme[0]== '*'){
+                resetNode(root, root->left->val * root->right->val);
+            }
+            else if(root->lexeme[0] == '/'){
+                if(root->right->val == 0){
+                    error(DEVIDEBYZERO);
+                }else 
+                    resetNode(root, root->left->val / root->right->val);
+            }
+            break;
+        }
+    }
+}
+
+void printAssembly(BTNode* root){
+    
 }

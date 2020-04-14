@@ -159,7 +159,7 @@ void freeTree(BTNode *root)
 void printPrefix(BTNode *root)
 {
 	if (root != NULL) {
-		printf("%s ", root->lexeme);
+		printf("%d ", root->val);
 		printPrefix(root->left);
 		printPrefix(root->right);
 	}
@@ -222,7 +222,7 @@ int printop(BTNode* root,int n){
 					table[i1].val = r;
 					table[i1].rn = 1;
 				}
-				return;
+				return 0;
 			case AND:
 				l=printop(root->left,n);
 				r=printop(root->right,n+1);
@@ -265,7 +265,7 @@ int printop(BTNode* root,int n){
 					else return 1;
 				}
 			default:
-				return;
+				return 0;
 		}
 	}
 	error(NAN);
@@ -468,14 +468,14 @@ int test(BTNode *root){
 	}
 	return 0;
 }
-void sett(BTNode *root,BTNode *left,const char* name,BTNode *right,TokenSet token,int val){
+void sett(BTNode *root,BTNode *left,const char* name,BTNode *right,TokenSet token,int val){ // 改變一下tree變成fresh過後的
 	root->left = left;
 	if(name!=NULL)strcpy(root->lexeme,name);
 	root->right = right;
 	root->token = token;
 	root->val = val;
 }
-void fresh(BTNode* root){
+void fresh(BTNode* root){ // 預先計算val
 	if(root!=NULL){
 		if(root->left!=NULL){
 			fresh(root->left);
@@ -533,6 +533,8 @@ void statement(void)
 		fresh(retp);
 		if(valid){
 			right = 0;
+			printPrefix(retp);
+			printf("\n");
 			printop(retp,3);
 		}
 		else {
