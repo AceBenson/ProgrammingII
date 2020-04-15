@@ -112,8 +112,8 @@ char* getLexeme(void)
 
 typedef struct {
 	char name[MAXLEN];
-	int val,r;
-	int n,rn;
+	int val, n;
+	// int rn ,r;
 } Symbol;
 
 
@@ -159,7 +159,7 @@ void freeTree(BTNode *root)
 void printPrefix(BTNode *root)
 {
 	if (root != NULL) {
-		printf("%d ", root->val);
+		printf("%s ", root->lexeme);
 		printPrefix(root->left);
 		printPrefix(root->right);
 	}
@@ -179,7 +179,7 @@ int find(char str[MAXLEN]){
 	}
 	return -1;
 }
-int validv=1;
+// int validv=1;
 int printop(BTNode* root,int n){
 	int i1,l,r;
 	if (root != NULL) {
@@ -201,7 +201,7 @@ int printop(BTNode* root,int n){
 						printf("MOV r%d [%d]\n",n,i1*4);
 					}
 				}
-				if(!table[i1].rn) validv = 0;
+				// if(!table[i1].rn) validv = 0;
 				return table[i1].val;
 			case INT:
 				printf("MOV r%d %d\n",n,root->val);
@@ -218,10 +218,10 @@ int printop(BTNode* root,int n){
 				else {
 					printf("MOV [%d] r%d\n",i1*4,n);
 				}
-				if(validv) {
-					table[i1].val = r;
-					table[i1].rn = 1;
-				}
+				// if(validv) {
+				// 	table[i1].val = r;
+				// 	table[i1].rn = 1;
+				// }
 				return 0;
 			case AND:
 				l=printop(root->left,n);
@@ -257,9 +257,9 @@ int printop(BTNode* root,int n){
 					return l*r;
 				}
 				else if (root->lexeme[0]=='/') {
-					if(r==0){
-						if(validv||(root->right->token==INT)) error(NAN);
-					}
+					// if(r==0){
+					// 	if(validv||(root->right->token==INT)) error(NAN);
+					// }
 					printf("DIV r%d r%d\n",n,n+1);
 					if(r!=0) return l/r;
 					else return 1;
@@ -298,9 +298,9 @@ int getval(void)
 			else{
 				if (sbcount < TBLSIZE) {
 					strcpy(table[sbcount].name, getLexeme());
-					table[sbcount].rn = 0;
+					// table[sbcount].rn = 0;
 					table[sbcount].n = 1;
-					table[sbcount].r = sbcount;
+					// table[sbcount].r = sbcount;
 					sbcount++;
 				} else {
 					error(RUNOUT);
@@ -468,14 +468,14 @@ int test(BTNode *root){
 	}
 	return 0;
 }
-void sett(BTNode *root,BTNode *left,const char* name,BTNode *right,TokenSet token,int val){ // 改變一下tree變成fresh過後的
+void sett(BTNode *root,BTNode *left,const char* name,BTNode *right,TokenSet token,int val){
 	root->left = left;
 	if(name!=NULL)strcpy(root->lexeme,name);
 	root->right = right;
 	root->token = token;
 	root->val = val;
 }
-void fresh(BTNode* root){ // 預先計算val
+void fresh(BTNode* root){
 	if(root!=NULL){
 		if(root->left!=NULL){
 			fresh(root->left);
@@ -533,8 +533,6 @@ void statement(void)
 		fresh(retp);
 		if(valid){
 			right = 0;
-			printPrefix(retp);
-			printf("\n");
 			printop(retp,3);
 		}
 		else {
@@ -552,22 +550,22 @@ int main()
 	char c;
 	int i;
 	table[0].name[0] = 'x';
-	table[0].r = 0;
+	// table[0].r = 0;
 	table[0].n = 1;
-	table[0].rn = 0;
+	// table[0].rn = 0;
 	//printf("%d\n",table[0].val);
 	table[1].name[0] = 'y';
-	table[1].r = 1;
+	// table[1].r = 1;
 	table[1].n = 1;
-	table[0].rn = 0;
+	// table[0].rn = 0;
 	table[2].name[0] = 'z';
-	table[2].r = 2;
+	// table[2].r = 2;
 	table[2].n = 1;
-	table[0].rn = 0;
+	// table[0].rn = 0;
 	sbcount = 3;
 	while ((c=fgetc(stdin))!=EOF&&valid) {
 		right = 0;
-		validv = 1;
+		// validv = 1;
 		ungetc(c,stdin);
 		statement();
 	}

@@ -35,6 +35,7 @@ typedef enum {UNKNOWN, END, INT, ID, ORANDXOR, ADDSUB, MULDIV, ASSIGN, LPAREN, R
 typedef struct {
     char name[MAXLEN];
     int val;
+    bool inMemory;
 } Symbol;
 
 Symbol table[TBLSIZE];
@@ -74,7 +75,11 @@ bool checkTree(BTNode* root);
 void resetNode(BTNode* node, int newVal);
 void reconstructTree(BTNode* root);
 
-void printAssembly(BTNode* root);
+int findIndex(char* name);
+void printAssembly(BTNode* root, int regNum);
+
+bool isRightSide = false;
+int sbcount = 0; // 目前的變數有多少個
 
 int main(void)
 {
@@ -82,15 +87,25 @@ int main(void)
     freopen( "input.in" , "r" , stdin ) ;
     freopen( "output.out" , "w" , stdout ) ;
     */
-    printf(">> ");
+    
+    strcpy(table[0].name, "x");
+    table[0].inMemory = true;
+    strcpy(table[1].name, "y");
+    table[1].inMemory = true;
+    strcpy(table[2].name, "z");
+    table[2].inMemory = true;
+    sbcount = 3;
+
+    // printf(">> ");
     while (1) {
         statement();
     }
+
     return 0;
 }
 
-int sbcount = 0; // 目前的變數有多少個
-int getval(void) // 回傳INT || ID 的值
+
+int getval(void) // 回傳 INT || ID 的值
 {
     int i, retval, found;
 
@@ -108,9 +123,13 @@ int getval(void) // 回傳INT || ID 的值
             }
         }
         if (!found) { // 如果找完都沒找到，就創建這個變數
+            if(isRightSide){
+                error(NOTFOUND);
+            }
             if (sbcount < TBLSIZE) {
                 strcpy(table[sbcount].name, getLexeme());
                 table[sbcount].val = 0;
+                table[sbcount].inMemory = true;
                 sbcount++;
             } else {
                 error(RUNOUT);
@@ -237,6 +256,7 @@ TokenSet getToken(void)
         return END;
     } else if (c == '=') {
         strcpy(lexeme, "=");
+        isRightSide = true;
         return ASSIGN;
     } else if (c == '(') {
         strcpy(lexeme, "(");
@@ -417,16 +437,16 @@ void statement(void)
     BTNode* retp;
 
     if (match(ENDFILE)) {
-
+        if(table[0].inMemory) printf("MOV r0 [0]\n");
+        if(table[1].inMemory) printf("MOV r1 [4]\n");
+        if(table[2].inMemory) printf("MOV r2 [8]\n");
+        printf("EXIT 0\n"); // Don't forget this line!!!
         exit(0);
-
     } else if (match(END)) {
-
-        printf(">> ");
+        // printf(">> ");
         advance();
-
     } else {
-
+        isRightSide = false;
         retp = expr();
         if (match(END)) {
 
@@ -435,22 +455,14 @@ void statement(void)
                 printf("EXIT 1\n");
                 exit(0);
             }
-            
-            // printf("%d\n", evaluateTree(retp));
-            // printPrefix(retp); 
-            // printf("\n");
-
             reconstructTree(retp);
 
-            // printf("%d\n", evaluateTree(retp));
-            // printPrefix(retp); 
-            // printf("\n");
-
             // TODO
+            printAssembly(retp, 3);
 
             freeTree(retp);
 
-            printf(">> ");
+            // printf(">> ");
             advance();
         }
 
@@ -489,7 +501,6 @@ void freeTree(BTNode *root){
 
 // myFunc
 bool isValid(BTNode* root){
-    printf("In isValid function\n");
     if(root->data == ASSIGN && root->left->data == ID){ // ID ASSIGN expr
         if(checkTree(root->right))
             return true;
@@ -502,12 +513,12 @@ bool checkTree(BTNode* root){
     if(root->data == ID){
         int i = 0;
         while (i<sbcount) { //去table找變數的值
-            if (strcmp(root->lexeme, table[i].name)==0) {
+            if (strcmp(root->lexeme, table[i].name)==0 && table[i].val != -1) {
                 return true;
             }
             ++i;
         }
-        return false;
+        return false; //理論上不會找不到，因為在getVal那邊，有沒看過的變數就會創建
     }else if(root->data == INT){
         return root->left == NULL && root->right == NULL;
     }else if(root->data == ASSIGN){
@@ -515,7 +526,7 @@ bool checkTree(BTNode* root){
         // exit(0);
         return false;
     }else{
-        return checkTree(root->left) && checkTree(root->left);
+        return checkTree(root->left) && checkTree(root->right);
     }
 }
 
@@ -569,6 +580,87 @@ void reconstructTree(BTNode* root){ //將常數部分先結合起來
     }
 }
 
-void printAssembly(BTNode* root){
+int findIndex(char* name){
+    for(int i=0 ; i<sbcount ; ++i){
+        if(strcmp(table[i].name, name) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+void printAssembly(BTNode* root, int regNum){
+    if(!root)
+        return;
     
+    int tableIndex;
+    switch (root->data){
+    case INT:
+        printf("MOV r%d %d\n", regNum, root->val);
+        break;
+    case ORANDXOR:
+        printAssembly(root->left, regNum);
+        printAssembly(root->right, regNum+1);
+        if(root->lexeme[0] == '|'){
+            printf("OR r%d r%d\n", regNum, regNum+1);
+        }else if(root->lexeme[0] == '&'){
+            printf("AND r%d r%d\n", regNum, regNum+1);
+        }else if(root->lexeme[0] == '^'){
+            printf("XOR r%d r%d\n", regNum, regNum+1);
+        }
+        break;
+    case MULDIV:
+        printAssembly(root->left, regNum);
+        printAssembly(root->right, regNum+1);
+        if(root->lexeme[0] == '*'){
+            printf("MUL r%d r%d\n", regNum, regNum+1);
+        }else if(root->lexeme[0] == '/'){
+            printf("DIV r%d r%d\n", regNum, regNum+1);
+        }
+        break;
+    case ADDSUB:
+        printAssembly(root->left, regNum);
+        printAssembly(root->right, regNum+1);
+        if(root->lexeme[0] == '+'){
+            printf("ADD r%d r%d\n", regNum, regNum+1);
+        }else if(root->lexeme[0] == '-'){
+            printf("SUB r%d r%d\n", regNum, regNum+1);
+        }
+        break;
+    case ID:
+        tableIndex = findIndex(root->lexeme);
+
+        if(table[tableIndex].inMemory){
+            if(tableIndex >= 0 && tableIndex <= 2){
+                // printf("MOV r%d [%d]\n", regNum, tableIndex*4);
+                // printf("MOV r%d r%d\n", tableIndex, regNum);
+                printf("MOV r%d [%d]\n", tableIndex, tableIndex*4);
+                table[tableIndex].inMemory = false;
+            }
+        }else{
+            if(tableIndex >= 0 && tableIndex <= 2){
+                printf("MOV r%d r%d\n", regNum, tableIndex);
+                // printf("MOV r%d [%d]\n", regNum, tableIndex*4);
+            }else {
+                printf("MOV r%d [%d]\n", regNum, tableIndex*4);
+            }
+        }
+        break;
+    case ASSIGN:
+        tableIndex = findIndex(root->left->lexeme);
+        printAssembly(root->right, regNum);
+
+        if(table[tableIndex].inMemory){
+            table[tableIndex].inMemory = false;
+        }
+
+        if(tableIndex >= 0 && tableIndex <= 2){
+            printf("MOV r%d r%d\n", tableIndex, regNum);
+        }else {
+            printf("MOV [%d] r%d\n", tableIndex*4, regNum);
+        }
+        break;
+    default:
+        // printf("ERROR\n");
+        break;
+    }
 }
