@@ -631,9 +631,9 @@ void printAssembly(BTNode* root, int regNum){
 
         if(table[tableIndex].inMemory){
             if(tableIndex >= 0 && tableIndex <= 2){
-                // printf("MOV r%d [%d]\n", regNum, tableIndex*4);
-                // printf("MOV r%d r%d\n", tableIndex, regNum);
-                printf("MOV r%d [%d]\n", tableIndex, tableIndex*4);
+                printf("MOV r%d [%d]\n", regNum, tableIndex*4);
+                printf("MOV r%d r%d\n", tableIndex, regNum);
+                // printf("MOV r%d [%d]\n", tableIndex, tableIndex*4);
                 table[tableIndex].inMemory = false;
             }
         }else{
@@ -647,7 +647,12 @@ void printAssembly(BTNode* root, int regNum){
         break;
     case ASSIGN:
         tableIndex = findIndex(root->left->lexeme);
-        printAssembly(root->right, regNum);
+        printAssembly(root->right, regNum); //maybe regNum can be 0, 1, 2?
+        // if(tableIndex >= 0 && tableIndex <= 2){
+        //     printAssembly(root->right, tableIndex);
+        // }else{
+        //     printAssembly(root->right, regNum);
+        // }
 
         if(table[tableIndex].inMemory){
             table[tableIndex].inMemory = false;
