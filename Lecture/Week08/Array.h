@@ -10,7 +10,7 @@ namespace I2P2019 {
         int size;   // size of the array
         int *data;  // data of the array
         static unsigned int serial_num;  //serial number
-        int id;     // id of the matrix
+        int id;     // id of the array
 
 
     public:
