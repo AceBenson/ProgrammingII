@@ -56,11 +56,9 @@ void BST::insert(int val) {
 
 Node* minValueNode(Node* root) {
     Node* curNode = root;
-
     while(curNode && curNode->lc != nullptr){
         curNode = curNode->lc;
     }
-
     return curNode;
 }
 
