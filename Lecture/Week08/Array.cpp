@@ -62,7 +62,7 @@ void Array::setArraySize(int n)
             for (int i=0; i<n; i++)   // initialize the data
                 data[i] = 0;
 
-      } else // throw error messages
+        } else // throw error messages
             throw "Array size should be >0.";
 
     } else    // throw error messages
