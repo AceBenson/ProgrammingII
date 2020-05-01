@@ -151,13 +151,13 @@ const Array &Array::operator=( const Array &B)
             throw "cannot self copy \n";
 
     } else if (data == nullptr) { // copy assignment constructor
-           try{
-                setArraySize(B.size);
-                for (int i=0; i<size; i++)
-                    data[i] = B.data[i];
-            } catch(const char* errmsg) {  // forward the error message to the caller
-                throw errmsg;
-            }
+        try{
+            setArraySize(B.size);
+            for (int i=0; i<size; i++)
+                data[i] = B.data[i];
+        } catch(const char* errmsg) {  // forward the error message to the caller
+            throw errmsg;
+        }
     }
     return *this; // enables x = y = z, for example
 } // end function operator=

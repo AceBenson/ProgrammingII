@@ -22,7 +22,7 @@ ostream& operator<< (ostream &output, const complex& c){
     if (c.i>=0)
         output << "(" << c.r << "+" << c.i << "i)";
     else
-        output << "(" << c.r << "-" << c.i << "i)";
+        output << "(" << c.r << "-" << -c.i << "i)";
    return output;
 }
 
