@@ -18,24 +18,12 @@ int main()
         }
         B = A;
         Array C = -A;
-//        C = A.operator+(B);
+        cout << C << endl;
+        C = A + B;
         cout << A++ << endl;
         cout << A << endl;
-        //cout << C << endl;
-
-/*
-        for(i=0; i<5; i++)
-            cout<< C[i] << " ";
-        cout << endl;
-*/
-/*
-        cin >> A >> B;
-        cout << A << endl;
-        cout << B << endl;
-
-        Array C = A + B;
         cout << C << endl;
-*/
+
     } catch (const char* s) {
         cout << s << endl;
     }catch (exception& e) {
