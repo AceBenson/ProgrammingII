@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "function.h"
+#include "11422.h"
 using namespace std;
 
 namespace oj
