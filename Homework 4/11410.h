@@ -62,11 +62,11 @@ namespace oj
 		//vec.push_back(2);
 		//vec[0] is equal to a[1]
 		//vec[1] is equal to a[0]
-		inline reference operator[](const size_type pos)
+		inline reference operator[](const size_type pos) //lhs
 		{
 			return begin_[pos];
 		}
-		inline const_reference operator[](const size_type pos) const
+		inline const_reference operator[](const size_type pos) const // rhs
 		{
 			return begin_[pos];
 		}
