@@ -44,7 +44,7 @@ void BST::insertNode(std::string& str) {
         splitStr.push_back(s);
     }
 
-    Shape* m_shape ;
+    Shape* m_shape ; // factory return this Shape
     if(splitStr[0] == "Square"){
         m_shape = new Square();
 
@@ -56,7 +56,7 @@ void BST::insertNode(std::string& str) {
         double tempArray[2] = {stod(splitStr[1]), stod(splitStr[2])};
         m_shape->setArea(tempArray);
     }
-    // cout << "m_shape->getArea() = " << m_shape->getArea() << endl;
+    // end of factory
     newNode->data = m_shape;
     bool done = false;
 
