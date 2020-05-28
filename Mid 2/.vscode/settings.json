@@ -1,7 +1,6 @@
 {
     "files.associations": {
         "*.html": "html",
-        "iostream": "cpp",
-        "xiosbase": "cpp"
+        "xstring": "cpp"
     }
 }

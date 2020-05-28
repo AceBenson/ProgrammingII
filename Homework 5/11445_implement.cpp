@@ -25,9 +25,10 @@ Vector::Vector(const Vector &rhs):Vector(){
 Vector& Vector::operator=(const Vector &rhs){
     if(this != &rhs){
         if(begin_ != nullptr){
-            this->~Vector();
+            this->~Vector(); 
         }
-
+        // only delete begin_
+        // "this" object is still available
         new (this) Vector(rhs);
     }
     return *this;
@@ -42,6 +43,7 @@ void Vector::erase(size_type pos){
     for(i = pos; i<sz-1; ++i) {
         begin_[i].~value_type();
         new (begin_+i) value_type(begin_[i+1]);
+        // begin_[i] = begin_[i+1];
     }
     last_--;
 }
@@ -59,11 +61,14 @@ void Vector::insert(size_type pos, const_reference val){
         for(i=sz; i>pos; --i){
             begin_[i].~value_type();
             new (begin_+i) value_type(begin_[i-1]);
+            // begin_[i] = begin_[i-1];
         }
     }
+    // cout << "typeof begin_[0]: "<< typeid(begin_[0]).name() << endl;
 
     begin_[pos].~value_type();
     new (begin_+pos) value_type(val);
+    // begin_[pos] = value_type(val);
     last_++;
 }
 
@@ -73,17 +78,21 @@ void Vector::reserve(size_type new_capacity) {
 
     if(capacity() < new_capacity) {
         // allocate new storage
-        new_storage = static_cast<pointer>(operator new[](sizeof(value_type) * new_capacity));
+        new_storage = (pointer)operator new[](sizeof(value_type) * new_capacity);
         sz = size();
+
+        // cout << "typeof new_storage[0]: "<< typeid(new_storage[0]).name() << endl;
 
         // init with copying data
         // you can also use "uninitialized copy" instead
         for(i=0; i<sz; ++i){
             new (new_storage+i) value_type(begin_[i]);
+            // new_storage[i] = value_type(begin_[i]);
         }
 
         for(i=sz; i<new_capacity; ++i){
             new (new_storage+i) value_type("");
+            // new_storage[i] = value_type("");
         }
 
         if(begin_ != nullptr){
@@ -101,4 +110,6 @@ Vector::~Vector() {
         iter->~value_type();
     }
     operator delete[](begin_);
+    // operator delete + destruct
+    // equal to delete
 }

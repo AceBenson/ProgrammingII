@@ -48,11 +48,11 @@ void List::remove(const_reference val) {
             Node* nextNode = temp->next;
 
             if(temp == begin_) { //head
-                if(temp->next != nullptr) { // only one node
+                if(temp->next != nullptr) { 
                     temp->next->prev = nullptr;
                     begin_ = nextNode;
-                } else {
-                    begin_ = nextNode;
+                } else { // only one node
+                    begin_ = nextNode; // (null)
                 }
             } else if (temp->next == nullptr) { //tail
                 temp->prev->next = nullptr;

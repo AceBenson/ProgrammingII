@@ -83,7 +83,7 @@ BigInt& BigInt::operator--() {
         }
     }
     if(strlen(_val) > 1 && _val[0] == '0'){
-        // char* new_val = new char[strlen(_val) - 1];
+        // char* new_val = new char[strlen(_val)];
         // strcpy(new_val, _val + 1);
         // delete _val;
         // _val = new_val;
@@ -109,7 +109,7 @@ BigInt BigInt::operator--(int num) {
         }
     }
     if(strlen(_val) > 1 && _val[0] == '0'){ //處理開頭的0
-        // char* new_val = new char[strlen(_val) - 1];
+        // char* new_val = new char[strlen(_val)];
         // strcpy(new_val, _val + 1);
         // delete _val;
         // _val = new_val;

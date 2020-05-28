@@ -17,10 +17,9 @@ void Vector::push_back(const_reference val) {
 }
 
 void Vector::erase(size_type pos) {
-    size_t new_size = size() - 1;
     begin_[pos].~value_type();
 
-    for(value_type *iter(begin_ + pos + 1); iter != last_; iter++) {
+    for(pointer iter(begin_ + pos + 1); iter != last_; iter++) {
         new (iter - 1) value_type(*iter);
         iter->~value_type();
     }
@@ -36,10 +35,11 @@ void Vector::reserve(size_type new_capacity) {
         pointer temp(static_cast<pointer> (operator new[] (sizeof(value_type) * new_capacity)));
         for(size_t i = 0; i < old_size; ++i) {
             new (temp + i) value_type(begin_[i]);
-            begin_[i].~value_type();
+            // begin_[i].~value_type();
         }
-        if(begin_ != nullptr) //may be not nedded this
-            operator delete[] (begin_);
+        if(begin_ != nullptr) //may be not needed this if
+            this->~Vector();
+            // operator delete[] (begin_);
         
         begin_ = temp;
         last_ = begin_ + old_size;
