@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-    ios::sync_with_stdio(false); // this will make stdio faster
+    // ios::sync_with_stdio(false); // this will make stdio faster
 
     int T;
     cin >> T;
@@ -34,6 +34,8 @@ int main()
                 h.erase(h.begin() + X, h.begin() + Y);
             }
         }
+
+        cout << "end of input\n";
 
         if (!h.empty())
         {
