@@ -24,6 +24,7 @@ namespace I2P2
         /* This is the base class of all the container-specialized iterators
         * In order to invoke a derived function from this class
         * you may have to either do a downcast or invoke from a virtual function */
+        virtual iterator_impl_base *clone() const = 0;
     };
 
     class vector_iterator : public iterator_impl_base
@@ -47,6 +48,9 @@ namespace I2P2
         pointer operator->() const;
         reference operator*() const;
         reference operator[](difference_type offset) const;
+
+        // my function
+        iterator_impl_base *clone() const;
     };
 
     class list_iterator : public iterator_impl_base
@@ -70,6 +74,9 @@ namespace I2P2
         pointer operator->() const;
         reference operator*() const;
         reference operator[](difference_type offset) const;
+
+        // my function
+        iterator_impl_base *clone() const;
     };
 
     class const_iterator
@@ -109,9 +116,9 @@ namespace I2P2
         bool operator<=(const const_iterator &rhs) const;
         bool operator>=(const const_iterator &rhs) const;
         /* This class holds an iterator_impl_base
-   * and you may want to have some ways to 
-   * invoke a container-specialized method from here
-   * for insert/erase methods (look at their parameters if you are not sure) */
+        * and you may want to have some ways to 
+        * invoke a container-specialized method from here
+        * for insert/erase methods (look at their parameters if you are not sure) */
     };
 
     class iterator : public const_iterator
