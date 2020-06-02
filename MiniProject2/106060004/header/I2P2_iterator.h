@@ -31,6 +31,7 @@ namespace I2P2
     {
     protected:
         // You may want to declare what your vector_iterator stores here
+        pointer ptr_to_data;
 
     public:
         vector_iterator();
@@ -49,7 +50,8 @@ namespace I2P2
         reference operator*() const;
         reference operator[](difference_type offset) const;
 
-        // my function
+        // my functions
+        vector_iterator(pointer p);
         iterator_impl_base *clone() const;
     };
 
@@ -57,6 +59,7 @@ namespace I2P2
     {
     protected:
         // You may want to declare what your list_iterator stores here
+        Node* _node;
 
     public:
         list_iterator();
@@ -75,7 +78,8 @@ namespace I2P2
         reference operator*() const;
         reference operator[](difference_type offset) const;
 
-        // my function
+        // my functions
+        list_iterator(Node* n);
         iterator_impl_base *clone() const;
     };
 

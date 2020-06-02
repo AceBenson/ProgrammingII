@@ -20,6 +20,13 @@ namespace I2P2
     using const_pointer = const value_type *;
     using reference = value_type &;
     using const_reference = const value_type &;
+
+    struct Node
+    {
+        Node *prev, *next;
+        value_type data;
+        Node(value_type d = 0) : prev(nullptr), next(nullptr), data(d) {}
+    };
 } // namespace I2P2
 
 #endif

@@ -9,6 +9,9 @@ namespace I2P2
     {
     private:
         // you may want to declare the necessary members for your Vector here
+        pointer begin_; // begin of array
+        pointer end_;   // end of array
+        pointer last_;  // end of current size
 
         /* The following are standard methods from the STL
         * If you are not sure what they do
