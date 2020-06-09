@@ -24,14 +24,17 @@ namespace I2P2
         /* This is the base class of all the container-specialized iterators
         * In order to invoke a derived function from this class
         * you may have to either do a downcast or invoke from a virtual function */
+        
+        // my functions
         virtual iterator_impl_base *clone() const = 0;
+        // virtual Node* node_ref() const = 0;
     };
 
     class vector_iterator : public iterator_impl_base
     {
     protected:
         // You may want to declare what your vector_iterator stores here
-        pointer ptr_to_data;
+        pointer ptr_to_data; //maybe use node as array?
 
     public:
         vector_iterator();
@@ -81,6 +84,7 @@ namespace I2P2
         // my functions
         list_iterator(Node* n);
         iterator_impl_base *clone() const;
+        Node* node_ref() const;
     };
 
     class const_iterator

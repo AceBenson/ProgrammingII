@@ -1,5 +1,6 @@
 #include "../header/I2P2_Vector.h"
 #include <iostream>
+#include <algorithm>
 
 namespace I2P2
 {
@@ -70,7 +71,7 @@ namespace I2P2
         return end_-begin_;
     }
     size_type Vector::size() const {
-        return size_;
+        return last_-begin_;
     }
 
 
@@ -81,39 +82,95 @@ namespace I2P2
         last_ = nullptr;
     }
     bool Vector::empty() const {
-        return size_ == 0;
+        return size() == 0;
     }
     void Vector::erase(const_iterator pos) {
-        std::cout << (*pos); //reference to value_type
-        // list have iterator to node??
+        // get pos from iterator
+        // &(*pos) // this is pointer to data
+        const_iterator it(&vector_iterator(begin_));
+        size_type posNum = pos - it;
 
-        if(pos < begin() || pos >= end()) {
-            return;
-        }
+        size_type i, sz = size();
 
-        for(const_iterator it = pos; it != end(); ++it) {
-            // ?
+        for(i = posNum; i<sz-1; ++i) {
+            begin_[i] = begin_[i+1];
         }
         last_--;
-        size_--;
     }
     void Vector::erase(const_iterator begin, const_iterator end) {
+        const_iterator it(&vector_iterator(begin_));
+        size_type beginNum = begin - it;
+        size_type endNum = end - it;
+        size_type length = endNum - beginNum;
 
+        size_type i, sz = size();
+
+        for(i = beginNum; i<sz-length; ++i) {
+            begin_[i] = begin_[i+length];
+        }
+        last_ -= length;
     }
     void Vector::insert(const_iterator pos, size_type count, const_reference val) {
+        const_iterator it(&vector_iterator(begin_));
+        size_type posNum = pos - it;
 
+        size_type cap = capacity();
+        size_type i, sz = size();
+
+        if(cap < sz + count ) {
+            cap = std::max((cap+count), (3*cap));
+            reserve(cap);
+        }
+
+        for(i=sz-1+count; i>=posNum+count; --i) {
+            begin_[i] = begin_[i-count];
+        }
+
+        for(i=posNum; i<posNum+count; ++i) {
+            begin_[i] = val;
+        }
+
+        last_ += count;
     }
     void Vector::insert(const_iterator pos, const_iterator begin, const_iterator end) {
+        const_iterator it(&vector_iterator(begin_));
+        size_type posNum = pos - it;
+        size_type beginNum = begin - it;
+        size_type endNum = end - it;
+        size_type length = endNum - beginNum;
 
+        size_type cap = capacity();
+        size_type i, sz = size();
+
+        if(cap < sz + length ) {
+            cap = std::max((cap+length), (3*cap));
+            reserve(cap);
+        }
+
+        for(i=sz-1+length; i>=posNum+length; --i) {
+            begin_[i] = begin_[i-length];
+        }
+
+        for(i=posNum; i<posNum+length; ++i) {
+            begin_[i] = *(begin_+i-posNum);
+        }
+
+        last_ += length;
     }
     void Vector::pop_back() {
-
+        last_--;
     }
     void Vector::pop_front() {
+        size_type i, sz = size();
 
+        for(i = 0; i<sz-1; ++i) {
+            begin_[i] = begin_[i+1];
+        }
+
+        last_--;
     }
     void Vector::push_back(const_reference val) {
-
+        
     }
     void Vector::push_front(const_reference val) {
 
