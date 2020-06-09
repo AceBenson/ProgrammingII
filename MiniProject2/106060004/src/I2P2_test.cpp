@@ -724,6 +724,9 @@ namespace I2P2_test
         bool operator()(T &&c) const
         {
             bool result(true);
+            // std::cout << "-----My Test-----\n";
+            // std::cout << c.end() - c.begin() << "\n";
+            // std::cout << c.size() << "\n";
             result &= check((c.end() - c.begin()) == c.size(), "(end - begin) is not equal to size");
             result &= check(c.begin() <= c.end(), "begin is not smaller than or equal to end");
             result &= check(c.end() >= c.begin(), "end is not greater than or equal to begin");

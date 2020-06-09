@@ -237,7 +237,7 @@ namespace I2P2
     }
 
     difference_type vector_iterator::operator-(const iterator_impl_base &rhs) const {
-        return reinterpret_cast<ptrdiff_t>(this->ptr_to_data) - reinterpret_cast<ptrdiff_t>((dynamic_cast<const vector_iterator&>(rhs)).ptr_to_data);
+        return this->ptr_to_data - dynamic_cast<const vector_iterator&>(rhs).ptr_to_data;
     }
     pointer vector_iterator::operator->() const {
         return ptr_to_data;
