@@ -14,7 +14,8 @@ namespace I2P2
         pointer last_;  // end of current size
 
         // remeber when last_ change, change size_ too.
-        size_type size_;
+        // size_type size_;
+        // size_type capacity_;
 
         /* The following are standard methods from the STL
         * If you are not sure what they do

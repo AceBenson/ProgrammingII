@@ -237,7 +237,7 @@ namespace I2P2
     }
 
     difference_type vector_iterator::operator-(const iterator_impl_base &rhs) const {
-        return this->ptr_to_data - (dynamic_cast<const vector_iterator&>(rhs)).ptr_to_data;
+        return reinterpret_cast<ptrdiff_t>(this->ptr_to_data) - reinterpret_cast<ptrdiff_t>((dynamic_cast<const vector_iterator&>(rhs)).ptr_to_data);
     }
     pointer vector_iterator::operator->() const {
         return ptr_to_data;
@@ -255,8 +255,9 @@ namespace I2P2
     // my functions
     vector_iterator::vector_iterator(pointer p) : ptr_to_data(p) {}
     iterator_impl_base *vector_iterator::clone() const {
-        return new vector_iterator(ptr_to_data);
+        return new vector_iterator(ptr_to_data); //will be deleted after destructor
     }
+    
     
     //////////////////////////////////////
     //                                  //
@@ -330,6 +331,9 @@ namespace I2P2
     }
 
     difference_type list_iterator::operator-(const iterator_impl_base &rhs) const {
+        // maybe use recursive 
+        // check 11423
+        
         difference_type ans = 0;
         Node* temp = _node;
         // check if rhs._node is after this->_node
@@ -367,6 +371,9 @@ namespace I2P2
     list_iterator::list_iterator(Node* n) : _node(n) {}
     iterator_impl_base *list_iterator::clone() const {
         return new list_iterator(_node);
+    }
+    Node* list_iterator::node_ref() const {
+        return _node;
     }
 
 } // namespace I2P2
