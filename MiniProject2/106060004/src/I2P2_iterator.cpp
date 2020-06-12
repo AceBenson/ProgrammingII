@@ -1,4 +1,5 @@
 #include "../header/I2P2_iterator.h"
+#include <iostream>
 
 namespace I2P2
 {
@@ -118,6 +119,10 @@ namespace I2P2
         return (*p_) >= *(rhs.p_);
     }
 
+    // my functions
+    Node* const_iterator::node_ref() const {
+        return p_->node_ref();
+    }
     
     //////////////////////////////////////
     //                                  //
@@ -190,6 +195,11 @@ namespace I2P2
         return (*p_)[offset];
     }
 
+    // my functions
+    Node* iterator::node_ref() const {
+        return p_->node_ref();
+    }
+
     //////////////////////////////////////
     //                                  //
     //			vector_iterator         //
@@ -237,6 +247,8 @@ namespace I2P2
     }
 
     difference_type vector_iterator::operator-(const iterator_impl_base &rhs) const {
+        // revise here
+        // solve the problem with (end - begin) != size
         return this->ptr_to_data - dynamic_cast<const vector_iterator&>(rhs).ptr_to_data;
     }
     pointer vector_iterator::operator->() const {
@@ -257,14 +269,16 @@ namespace I2P2
     iterator_impl_base *vector_iterator::clone() const {
         return new vector_iterator(ptr_to_data); //will be deleted after destructor
     }
-    
+    Node* vector_iterator::node_ref() const {
+        return nullptr;
+    }
     
     //////////////////////////////////////
     //                                  //
     //			list_iterator           //
     //                                  //
     //////////////////////////////////////
-    list_iterator::list_iterator() : _node(nullptr) {}
+    list_iterator::list_iterator() : _node(nullptr), _head(nullptr) {}
     iterator_impl_base &list_iterator::operator++() {
         _node = _node->next;
         return *this;
@@ -292,67 +306,98 @@ namespace I2P2
     bool list_iterator::operator!=(const iterator_impl_base &rhs) const {
         return this->_node != (dynamic_cast<const list_iterator&>(rhs))._node;
     }
+
     bool list_iterator::operator<(const iterator_impl_base &rhs) const {
         // list_iterator should not overload this operator
         // return this->_node < (dynamic_cast<const list_iterator&>(rhs))._node;
-        Node* temp = _node->next;
-        while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
-            temp = temp->next;
-        }
-        return (temp == dynamic_cast<const list_iterator&>(rhs)._node) ? true : false;
 
+        difference_type head_to_this = 1, head_to_rhs = 1;
+        Node* temp = _head->next;
+        while(temp != _node) {
+            temp = temp->next;
+            head_to_this++;
+        }
+        temp = _head->next;
+        while(temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+            temp = temp->next;
+            head_to_rhs++;
+        }
+        return head_to_this < head_to_rhs;
     }
     bool list_iterator::operator>(const iterator_impl_base &rhs) const {
         // list_iterator should not overload this operator
         // return this->_node > (dynamic_cast<const list_iterator&>(rhs))._node;
-        Node* temp = _node->next;
-        while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
-            temp = temp->prev;
+
+        difference_type head_to_this = 1, head_to_rhs = 1;
+        Node* temp = _head->next;
+        while(temp != _node) {
+            temp = temp->next;
+            head_to_this++;
         }
-        return (temp == dynamic_cast<const list_iterator&>(rhs)._node) ? true : false;
+        temp = _head->next;
+        while(temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+            temp = temp->next;
+            head_to_rhs++;
+        }
+
+        return head_to_this > head_to_rhs;
     }
     bool list_iterator::operator<=(const iterator_impl_base &rhs) const {
         // list_iterator should not overload this operator
         // return this->_node <= (dynamic_cast<const list_iterator&>(rhs))._node;
-        Node* temp = _node;
-        while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+
+        difference_type head_to_this = 1, head_to_rhs = 1;
+        Node* temp = _head->next;
+        while(temp != _node) {
             temp = temp->next;
+            head_to_this++;
         }
-        return (temp == dynamic_cast<const list_iterator&>(rhs)._node) ? true : false;
+        temp = _head->next;
+        while(temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+            temp = temp->next;
+            head_to_rhs++;
+        }
+
+        return head_to_this <= head_to_rhs;
     }
     bool list_iterator::operator>=(const iterator_impl_base &rhs) const {
         // list_iterator should not overload this operator
         // return this->_node >= (dynamic_cast<const list_iterator&>(rhs))._node;
-        Node* temp = _node;
-        while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
-            temp = temp->prev;
+
+        difference_type head_to_this = 1, head_to_rhs = 1;
+        Node* temp = _head->next;
+        while(temp != _node) {
+            temp = temp->next;
+            head_to_this++;
         }
-        return (temp == dynamic_cast<const list_iterator&>(rhs)._node) ? true : false;
+        temp = _head->next;
+        while(temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+            temp = temp->next;
+            head_to_rhs++;
+        }
+
+        return head_to_this >= head_to_rhs;
     }
 
     difference_type list_iterator::operator-(const iterator_impl_base &rhs) const {
         // maybe use recursive 
         // check 11423
-        
-        difference_type ans = 0;
-        Node* temp = _node;
-        // check if rhs._node is after this->_node
-        while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+
+        difference_type head_to_this = 1, head_to_rhs = 1;
+        Node* temp = _head->next;
+        while(temp != _node) {
             temp = temp->next;
-            ans++;
+            head_to_this++;
         }
-        // if not found
-        if(!temp) {
-            ans = 0;
-            temp = _node;
-            // check if rhs._node is before this->_node
-            while(temp && temp != dynamic_cast<const list_iterator&>(rhs)._node) {
-                temp = temp->prev;
-                ans--;
-            }
+        temp = _head->next;
+        while(temp != dynamic_cast<const list_iterator&>(rhs)._node) {
+            temp = temp->next;
+            head_to_rhs++;
         }
-        return ans;
+        return head_to_this - head_to_rhs;
     }
+
+
     pointer list_iterator::operator->() const {
         return &(_node->data);
     }
@@ -361,16 +406,24 @@ namespace I2P2
     }
     reference list_iterator::operator[](difference_type offset) const {
         Node* temp = _node;
-        while(offset--) {
-            temp = temp->next;
+         //offset maybe < 0
+        if(offset > 0) {
+            while(offset--) {
+                temp = temp->next;
+            }
+        } else if (offset < 0) {
+            while(offset++) {
+                temp = temp->prev;
+            }
         }
+
         return temp->data;
     }
 
     // my functions
-    list_iterator::list_iterator(Node* n) : _node(n) {}
+    list_iterator::list_iterator(Node* n, Node* h) : _node(n), _head(h) {}
     iterator_impl_base *list_iterator::clone() const {
-        return new list_iterator(_node);
+        return new list_iterator(_node, _head);
     }
     Node* list_iterator::node_ref() const {
         return _node;

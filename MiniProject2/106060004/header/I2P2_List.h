@@ -11,8 +11,7 @@ namespace I2P2
     {
     protected:
         // you may want to declare necessary members for your List container here
-        Node *_head;
-        Node *_tail;
+        Node *_head; //which means dummy node
         size_type _size;
 
         /* The following are standard methods from the STL

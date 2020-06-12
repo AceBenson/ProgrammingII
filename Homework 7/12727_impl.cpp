@@ -50,8 +50,8 @@ void list::clear() {
     Node* temp = _head;
     while(temp != _tail) {
         Node* curNode = temp;
-        delete curNode;
         temp = temp->next;
+        delete curNode;
     }
     _head = _tail;
     _size = 0;

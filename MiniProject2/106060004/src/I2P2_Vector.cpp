@@ -1,6 +1,8 @@
 #include "../header/I2P2_Vector.h"
-#include <iostream>
-#include <algorithm>
+// #include <iostream>
+// #include <algorithm>
+
+// for those for loop, maybe use memmove?
 
 namespace I2P2
 {
@@ -84,9 +86,7 @@ namespace I2P2
 
     // -----these four functions-----
     void Vector::erase(const_iterator pos) {
-        vector_iterator base(buffer);
-        const_iterator it(&base);
-        size_type posNum = pos - it;
+        size_type posNum = pos.operator->() - buffer;
 
         for(size_type i = posNum; i<size_-1; ++i) {
             buffer[i] = buffer[i+1];
@@ -94,12 +94,8 @@ namespace I2P2
         size_--;
     }
     void Vector::erase(const_iterator begin, const_iterator end) {
-        vector_iterator base(buffer);
-        const_iterator it(&base);
-        // maybe adjust
-        size_type beginNum = begin - it;
-        size_type endNum = end - it;
-        size_type length = endNum - beginNum;
+        size_type beginNum = begin.operator->() - buffer;
+        size_type length = end - begin;
 
         size_type i, sz = size();
         for(i = beginNum; i<sz-length; ++i) {
@@ -108,7 +104,6 @@ namespace I2P2
         size_ -= length;
     }
     void Vector::insert(const_iterator pos, size_type count, const_reference val) {
-        
         size_type posNum = pos.operator->() - buffer;
         
         if(posNum > size_) return;
@@ -136,8 +131,8 @@ namespace I2P2
     }
     void Vector::insert(const_iterator pos, const_iterator begin, const_iterator end) {
         size_type posNum = pos.operator->() - buffer;
-        size_type length = end.operator->() - begin.operator->();
-
+        // size_type length = end.operator->() - begin.operator->();
+        size_type length = end - begin;
 
         if(posNum > size_) return;
 
@@ -188,18 +183,14 @@ namespace I2P2
             old_capacity_ = (old_capacity_+1 > 3*old_capacity_) ? (old_capacity_+1) : (3*old_capacity_);
             reserve(old_capacity_);
         }
-
         for(size_type i = size_; i>0; --i) {
             buffer[i] = buffer[i-1];
         }
-
         buffer[0] = val;
         size_++;
     }
     void Vector::reserve(size_type new_capacity) {
         pointer new_buffer;
-        // std::cout << "reserve: ";
-        // std::cout << capacity_ << " " << new_capacity << std::endl;
 
         if(capacity_ < new_capacity) {
             new_buffer = new value_type[new_capacity];
@@ -210,8 +201,6 @@ namespace I2P2
             buffer = new_buffer;
             capacity_ = new_capacity;
         }
-
-        // std::cout << "end of reserve\n";
     }
     void Vector::shrink_to_fit() {
         pointer new_buffer;

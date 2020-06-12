@@ -27,7 +27,7 @@ namespace I2P2
         
         // my functions
         virtual iterator_impl_base *clone() const = 0;
-        // virtual Node* node_ref() const = 0;
+        virtual Node* node_ref() const = 0;
     };
 
     class vector_iterator : public iterator_impl_base
@@ -56,6 +56,7 @@ namespace I2P2
         // my functions
         vector_iterator(pointer p);
         iterator_impl_base *clone() const;
+        Node* node_ref() const;
     };
 
     class list_iterator : public iterator_impl_base
@@ -63,6 +64,7 @@ namespace I2P2
     protected:
         // You may want to declare what your list_iterator stores here
         Node* _node;
+        Node* _head;
 
     public:
         list_iterator();
@@ -82,7 +84,7 @@ namespace I2P2
         reference operator[](difference_type offset) const;
 
         // my functions
-        list_iterator(Node* n);
+        list_iterator(Node* n, Node* h);
         iterator_impl_base *clone() const;
         Node* node_ref() const;
     };
@@ -127,6 +129,9 @@ namespace I2P2
         * and you may want to have some ways to 
         * invoke a container-specialized method from here
         * for insert/erase methods (look at their parameters if you are not sure) */
+        
+        // my functions
+        Node* node_ref() const;
     };
 
     class iterator : public const_iterator
@@ -154,6 +159,9 @@ namespace I2P2
         pointer operator->() const;
         reference operator*() const;
         reference operator[](difference_type offset) const;
+
+        // my functions
+        Node* node_ref() const;
     };
 } // namespace I2P2
 
