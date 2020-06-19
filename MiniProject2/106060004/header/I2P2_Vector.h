@@ -13,8 +13,7 @@ namespace I2P2
         // pointer begin_; // begin of array
         // pointer end_;   // end of array
         // pointer last_;  // end of current size
-
-        // remeber when last_ change, change size_ too.
+        
         size_type size_;
         size_type capacity_;
 
