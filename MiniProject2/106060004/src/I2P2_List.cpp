@@ -14,7 +14,7 @@ namespace I2P2
         _head->prev = _head; // not nullptr
         _size = 0;
     }
-    List::List(const List &rhs) : List() { //靠邀阿忘記初始化
+    List::List(const List &rhs) : List() { //靠邀阿忘記初始化= =
         Node* temp = rhs._head->next;
         while(temp != rhs._head) {
             push_back(temp->data);

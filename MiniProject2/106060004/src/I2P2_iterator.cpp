@@ -215,15 +215,17 @@ namespace I2P2
         return *this;
     }
     iterator_impl_base &vector_iterator::operator+=(difference_type offset) {
-        while(offset--) {
-            ++ptr_to_data;
-        }
+        // while(offset--) {
+        //     ++ptr_to_data;
+        // }
+        ptr_to_data += offset;
         return *this;
     }
     iterator_impl_base &vector_iterator::operator-=(difference_type offset) {
-        while(offset--) {
-            --ptr_to_data;
-        }
+        // while(offset--) {
+        //     --ptr_to_data;
+        // }
+        ptr_to_data -= offset;
         return *this;
     }
 

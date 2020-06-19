@@ -1,5 +1,6 @@
 #include <iostream>
 #include "header/I2P2_test.h"
+#include <ctime>
 
 int main() {
   
@@ -14,7 +15,7 @@ int main() {
 #endif
 
   std::cout << "Finished" << std::endl;
-
+  std::cout << (double)clock() / CLOCKS_PER_SEC << "S";
   return 0;
 }
 

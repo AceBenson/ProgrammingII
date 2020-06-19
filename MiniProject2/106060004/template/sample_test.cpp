@@ -123,6 +123,7 @@ int main()
             b.insert(b.end(), *it);
     });
     std::cout << "Finished\n";
+    std::cout << (double)clock() / CLOCKS_PER_SEC << "S";
 
     return 0;
 }
