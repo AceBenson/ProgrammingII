@@ -7,6 +7,8 @@
 #include <queue>
 #include <iterator>
 #include <string>
+#include <array>
+#include <cmath>
 
 using namespace std;
 
@@ -20,7 +22,7 @@ struct Node {
     int LEN;          // length of the puzzle = sqrt(SIZE)
 
     // constructors
-    Node(State input): st(input), level(1), distance(0), parent(nullptr){
+    Node(State input): st(input), level(0), distance(0), parent(nullptr){
         LEN = sqrt(SIZE);
         calc_distance();
     }
@@ -36,13 +38,51 @@ struct Node {
         int x=0, y=0, a, b;   // x, y is the current position
                               // a, b is the position in the goal
 
+        bool in_col[16] = {};
+        bool in_row[16] = {};
+
         for (i=0;i<SIZE; i++){
             if (st[i]!=0){    // the value in the current position
                 a = (st[i]-1)%LEN;   // the position of the value in the goal
                 b = (st[i]-1)/LEN;
                 distance += (abs(x-a) + abs(y-b));  // Manhattan distance
+
+                in_col[i] = (x == a);
+                in_row[i] = (y == b);
             }
             if (++x >=LEN){   // move the the next position
+                x = 0; ++y;
+            }
+        }
+
+        distance += level;
+
+        x = 0;
+        y = 0;
+        for (i=0; i<SIZE; ++i) {
+            if(st[i] != 0) {
+                if(in_col[i]) {
+                    // only check one side(down)
+                    for (int r = y; r <= LEN; ++r) {
+                        int j = r*LEN + x;
+                        if(st[j] == 0)
+                            continue;
+                        if(in_col[j] && st[j] < st[i])
+                            distance += 2;
+                    }
+                }
+                if(in_row[i]) {
+                    // only check one side(right)
+                    for (int c = x; c <= LEN; ++c) {
+                        int j = y*LEN + c;
+                        if(st[j] == 0)
+                            continue;
+                        if(in_row[j] && st[j] < st[i])
+                            distance += 2;
+                    }
+                }
+            }
+            if (++x >= LEN){   // move the the next position
                 x = 0; ++y;
             }
         }
@@ -178,7 +218,7 @@ public:
     }
 
     // find the difference between two consecutive states
-    int diff(State &a, State &b){
+    int diff(State &a, State &b){ //only two cells will be different
         int i;
         for(i=0;i<SIZE;i++){
             if(a[i]!=b[i]){
@@ -210,23 +250,22 @@ public:
 int main()
 {
     int step;
-    array<int, 16> init1 = {5, 1, 3, 4,
-                          9, 2, 6, 8,
-                          10, 14, 7, 11,
-                          13, 15, 12, 0};
-    array<int, 9> init2 = {1, 3, 5,
-                          4, 2, 0,
-                          7, 8, 6};
+    array<int, 16> init1;
+
+    for(int i=0; i<16; ++i) {
+        cin >> init1[i];
+    }
 
     SlideGame<16> problem(init1);
 //    SlideGame<9> problem(init2);
 
     step = problem.solve();
-    if (step>0){
-//        problem.show_solutions();
-        cout<< "number of steps = "<< step << endl;
-    } else
-        cout << "no solution \n";
+    cout<< step << endl;
+    // if (step>0){
+    //     // problem.show_solutions();
+        
+    // } else
+    //     cout << "no solution \n";
 
     return 0;
 }

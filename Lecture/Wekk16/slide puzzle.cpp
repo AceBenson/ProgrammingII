@@ -7,12 +7,15 @@
 #include <queue>
 #include <iterator>
 #include <string>
+#include <array>
+#include <cmath>
 
 /*6007, 7067 */
 
 using namespace std;
 
-template<int SIZE> struct Node {
+template<int SIZE> 
+struct Node {
     using State = array<int, SIZE>;
 
     State st;         // the state of slide puzzle
@@ -66,11 +69,11 @@ public:
             }
         }
 
-        // move up
+        // move up (0 move down)
         if (y < LEN-1)
             SS.insert(MoveBlock(s, pos+LEN, pos));
 
-        // move down
+        // move down (0 move up)
         if (y>0)
             SS.insert(MoveBlock(s, pos-LEN, pos));
 
@@ -90,7 +93,7 @@ public:
     bool found(State st)
     {
         for (int i=0; i<SIZE-1; i++) {
-            if (st[i]!= i+1)
+            if (st[i] != i+1)
                 return false;
         }
         return true;
@@ -196,7 +199,7 @@ int main()
 
     step = problem.solve();
     if (step>0){
-//        problem.show_solutions();
+        problem.show_solutions();
         cout<< "number of steps = "<< step << endl;
     } else
         cout << "no solution \n";
