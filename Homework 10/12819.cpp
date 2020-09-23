@@ -106,7 +106,7 @@ private:
 public:
     SlideGame(State st) : initialState(st) {}
 
-    State MoveBlock(State s, int from, int to) {
+    State MoveBlock(State s, int from, int to) { // 
         State t = s;
 
         int temp = t[from];
